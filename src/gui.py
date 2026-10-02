@@ -9,11 +9,13 @@ from shell import CommandError, VFS_NAME
 
 class ShellWindow:
 
-    def __init__(self, shell):
+    def __init__(self, shell, vfs_name=VFS_NAME, logger=None):
         self.shell = shell
+        self.vfs_name = vfs_name
+        self.logger = logger
         self.app = QApplication.instance() or QApplication([])
         self.root = QWidget()
-        self.root.setWindowTitle("Эмулятор — " + VFS_NAME)
+        self.root.setWindowTitle("Эмулятор - " + self.vfs_name)
         self.root.resize(760, 480)
         self.root.setMinimumSize(500, 300)
         layout = QVBoxLayout(self.root)
@@ -27,7 +29,7 @@ class ShellWindow:
         button = QPushButton("Выполнить")
         button.clicked.connect(self.submit)
         row = QHBoxLayout()
-        row.addWidget(QLabel(VFS_NAME + " $"))
+        row.addWidget(QLabel(self.vfs_name + " $"))
         row.addWidget(self.entry, 1)
         row.addWidget(button)
         layout.addLayout(row)
@@ -37,16 +39,33 @@ class ShellWindow:
         if text:
             self.output.appendPlainText(text)
 
-    def submit(self):
-        line = self.entry.text()
-        self.entry.clear()
-        self.write(VFS_NAME + " $ " + line)
+    def execute_line(self, line):
+        self.write(self.vfs_name + " $ " + line)
+        error_message = ""
         try:
             self.write(self.shell.execute(line))
         except CommandError as error:
-            self.write("Ошибка: " + str(error))
+            error_message = str(error)
+            self.write("Ошибка: " + error_message)
+        if self.logger and line.strip():
+            try:
+                self.logger.record(line, error_message)
+            except OSError as error:
+                self.write("Ошибка записи лога: " + str(error))
         if self.shell.closed:
             self.root.close()
+
+    def submit(self):
+        line = self.entry.text()
+        self.entry.clear()
+        self.execute_line(line)
+
+    def run_script(self, path):
+        from pathlib import Path
+        for line in Path(path).read_text(encoding="utf-8").splitlines():
+            self.execute_line(line)
+            if self.shell.closed:
+                break
 
     def run(self):
         self.root.show()

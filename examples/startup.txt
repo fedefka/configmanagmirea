@@ -1,0 +1,8 @@
+ls
+ls docs
+cd "my docs"
+cd "$HOME"
+unknown
+ls a b
+cd "
+ls
