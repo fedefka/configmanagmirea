@@ -20,8 +20,10 @@ def parse_command(line):
 
 class Shell:
 
-    def __init__(self):
+    def __init__(self, vfs=None):
         self.closed = False
+        self.vfs = vfs
+        self.current = "/"
 
     def execute(self, line):
         parts = parse_command(line)
