@@ -11,11 +11,11 @@ from shell import CommandError, Shell, parse_command
 
 class ShellTests(unittest.TestCase):
 
-    def test_stubs(self):
+    def test_ls_and_cd(self):
         shell = Shell()
-        self.assertEqual(shell.execute("ls"), "ls: аргументы []")
-        self.assertEqual(shell.execute("cd docs"),
-                         "cd: аргументы ['docs']")
+        self.assertEqual(shell.execute("ls"), "hello.txt")
+        self.assertEqual(shell.execute("cd /"), "")
+        self.assertEqual(shell.current, "/")
 
     def test_environment_variables(self):
         with patch.dict(os.environ, {"SHELL_TEST": "/folder with spaces"}):

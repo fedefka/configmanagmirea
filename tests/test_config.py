@@ -30,5 +30,5 @@ class ConfigTests(unittest.TestCase):
             self.assertEqual([event.findtext('command') for event in events], ['unknown', 'ls', 'exit'])
             self.assertIn('Неизвестная команда', events[0].findtext('error'))
             self.assertTrue(events[0].findtext('datetime'))
-            self.assertIn('ls: аргументы []', window.output.toPlainText())
+            self.assertIn('hello.txt', window.output.toPlainText())
             self.assertTrue(window.shell.closed)

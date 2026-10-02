@@ -1,0 +1,33 @@
+ls
+ls /
+ls -al /
+ls /root.txt
+cd one/two
+ls
+cd ..
+cd /
+cd
+cd /root.txt
+cd missing
+cd a b
+wc root.txt
+wc -l root.txt
+wc -w root.txt
+wc -m root.txt
+wc -c root.txt
+wc -lwmc root.txt one/two/three/data.txt
+wc /
+wc missing
+wc
+tree
+tree -a
+tree -d
+tree -L 2 /
+tree -L nope
+tree /root.txt
+ls missing
+ls -z
+unknown
+cd "$HOME"
+cd "
+ls
