@@ -1,6 +1,7 @@
 import os
 import posixpath
 import shlex
+import re
 from pathlib import Path
 
 from vfs import VFSError, VirtualFileSystem
@@ -34,7 +35,7 @@ class Shell:
             return ''
         command, arguments = parts[0], parts[1:]
         commands = {'ls': self.ls, 'cd': self.cd, 'wc': self.wc, 'tree': self.tree,
-                    'exit': self.exit}
+                    'exit': self.exit, 'chown': self.chown, 'rmdir': self.rmdir}
         if command not in commands:
             raise CommandError('Неизвестная команда: ' + command)
         try:
@@ -83,8 +84,8 @@ class Shell:
             item = self.vfs.get(name)
             label = posixpath.basename(name)
             if 'l' in flags:
-                label = '{} {} {} {}'.format('d' if item['directory'] else '-',
-                                             item['owner'], len(item['data']), label)
+                label = '{} {} {} {} {}'.format('d' if item['directory'] else '-',
+                                                item['owner'], item['group'], len(item['data']), label)
             lines.append(label)
         return '\n'.join(lines)
 
@@ -162,3 +163,36 @@ class Shell:
         visit(path, '', 1)
         lines.append('{} directories, {} files'.format(*counts))
         return '\n'.join(lines)
+
+    def chown(self, arguments):
+        flags, values = self.options(arguments, 'R')
+        if len(values) < 2:
+            raise CommandError('chown: требуется владелец и хотя бы один путь')
+        owner, separator, group = values[0].partition(':')
+        if not owner and not group:
+            raise CommandError('chown: владелец или группа не заданы')
+        for value in (owner, group):
+            if value and not re.fullmatch(r'[A-Za-z0-9_.-]+', value):
+                raise CommandError('chown: неверное имя владельца или группы')
+        if separator and not group:
+            raise CommandError('chown: группа не задана')
+        paths = [self.vfs.resolve(value, self.current) for value in values[1:]]
+        for path in paths:
+            self.vfs.get(path)
+        for path in paths:
+            self.vfs.chown(path, owner, group if separator else None, 'R' in flags)
+        return ''
+
+    def rmdir(self, arguments):
+        flags, paths = self.options(arguments, 'p')
+        if not paths:
+            raise CommandError('rmdir: требуется хотя бы одна директория')
+        for name in paths:
+            path = self.vfs.resolve(name, self.current)
+            self.vfs.rmdir(path, self.current)
+            if 'p' in flags:
+                path = posixpath.dirname(path)
+                while path != '/':
+                    self.vfs.rmdir(path, self.current)
+                    path = posixpath.dirname(path)
+        return ''

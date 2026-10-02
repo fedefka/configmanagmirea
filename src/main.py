@@ -1,5 +1,4 @@
 import sys
-from pathlib import Path
 
 from config import CommandLog, read_config
 from gui import ShellWindow

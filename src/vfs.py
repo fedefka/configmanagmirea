@@ -31,6 +31,7 @@ class VirtualFileSystem:
             'directory': path.is_dir(),
             'data': b'' if path.is_dir() else path.read_bytes(),
             'owner': str(getattr(path.stat(), 'st_uid', 0)),
+            'group': str(getattr(path.stat(), 'st_gid', 0)),
         }
 
     def resolve(self, path, current='/'):
@@ -49,3 +50,24 @@ class VirtualFileSystem:
             raise VFSError('Не является директорией: ' + path)
         return sorted(name for name in self.entries
                       if name != '/' and posixpath.dirname(name) == path)
+
+    def chown(self, path, owner, group=None, recursive=False):
+        self.get(path)
+        names = [path]
+        if recursive:
+            prefix = path.rstrip('/') + '/'
+            names += [name for name in self.entries if name != path and name.startswith(prefix)]
+        for name in names:
+            if owner:
+                self.entries[name]['owner'] = owner
+            if group is not None:
+                self.entries[name]['group'] = group
+
+    def rmdir(self, path, current):
+        if path == '/':
+            raise VFSError('Нельзя удалить корень VFS')
+        if current == path or current.startswith(path + '/'):
+            raise VFSError('Нельзя удалить текущую директорию или её родителя')
+        if self.children(path):
+            raise VFSError('Директория не пуста: ' + path)
+        del self.entries[path]
