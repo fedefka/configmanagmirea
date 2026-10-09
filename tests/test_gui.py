@@ -2,16 +2,11 @@ import os
 import sys
 import unittest
 from pathlib import Path
-
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
 from gui import ShellWindow
 from shell import Shell
-
-
 class WindowTests(unittest.TestCase):
-
     def test_dialogue(self):
         shell = Shell()
         window = ShellWindow(shell)

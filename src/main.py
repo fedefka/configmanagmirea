@@ -1,11 +1,8 @@
 import sys
 from pathlib import Path
-
 from config import CommandLog, read_config
 from gui import ShellWindow
 from shell import Shell
-
-
 def main():
     config = read_config()
     try:
@@ -22,7 +19,5 @@ def main():
         print('Ошибка: ' + str(error), file=sys.stderr)
         return 1
     return 0
-
-
 if __name__ == '__main__':
     sys.exit(main())
