@@ -4,21 +4,15 @@ import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
-
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
-
 from config import CommandLog, read_config
 from gui import ShellWindow
 from shell import Shell
-
-
 class ConfigTests(unittest.TestCase):
-
     def test_arguments(self):
         config = read_config(['--vfs', 'data', '--log', 'events.xml', '--script', 'start.txt'])
         self.assertEqual((config.vfs, config.log, config.script), ('data', 'events.xml', 'start.txt'))
-
     def test_script_and_xml(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder)

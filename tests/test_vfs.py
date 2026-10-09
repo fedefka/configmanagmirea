@@ -2,14 +2,9 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
-
 from vfs import VFSError, VirtualFileSystem
-
-
 class VFSTests(unittest.TestCase):
-
     def test_snapshot(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
@@ -23,7 +18,6 @@ class VFSTests(unittest.TestCase):
             self.assertEqual(vfs.children('/a/b'), ['/a/b/c'])
             self.assertEqual(vfs.resolve('../c', '/a/b'), '/a/c')
             self.assertEqual(vfs.resolve('../../..'), '/')
-
     def test_invalid_sources(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

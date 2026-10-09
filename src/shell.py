@@ -2,32 +2,21 @@ import os
 import posixpath
 import shlex
 from pathlib import Path
-
 from vfs import VFSError, VirtualFileSystem
-
-
 VFS_NAME = 'VFS'
-
-
 class CommandError(Exception):
     pass
-
-
 def parse_command(line):
     try:
         arguments = shlex.split(line)
     except ValueError as error:
         raise CommandError('Неверные кавычки: ' + str(error)) from error
     return [os.path.expandvars(argument) for argument in arguments]
-
-
 class Shell:
-
     def __init__(self, vfs=None):
         self.closed = False
         self.vfs = vfs or VirtualFileSystem(Path(__file__).resolve().parents[1] / 'examples/vfs/minimal')
         self.current = '/'
-
     def execute(self, line):
         parts = parse_command(line)
         if not parts:
@@ -41,13 +30,11 @@ class Shell:
             return commands[command](arguments)
         except VFSError as error:
             raise CommandError(command + ': ' + str(error)) from error
-
     def exit(self, arguments):
         if arguments:
             raise CommandError('exit: аргументы не поддерживаются')
         self.closed = True
         return 'Завершение работы'
-
     def options(self, arguments, allowed):
         flags = set()
         paths = []
@@ -65,12 +52,10 @@ class Shell:
             else:
                 paths.append(argument)
         return flags, paths
-
     def one_path(self, arguments, default):
         if len(arguments) > 1:
             raise CommandError('Ожидается не более одного пути')
         return self.vfs.resolve(arguments[0] if arguments else default, self.current)
-
     def ls(self, arguments):
         flags, paths = self.options(arguments, 'al')
         path = self.one_path(paths, self.current)
@@ -87,14 +72,12 @@ class Shell:
                                              item['owner'], len(item['data']), label)
             lines.append(label)
         return '\n'.join(lines)
-
     def cd(self, arguments):
         path = self.one_path(arguments, '/')
         if not self.vfs.get(path)['directory']:
             raise VFSError('Не является директорией: ' + path)
         self.current = path
         return ''
-
     def wc(self, arguments):
         flags, paths = self.options(arguments, 'lwmc')
         if not paths:
@@ -116,7 +99,6 @@ class Shell:
         if len(paths) > 1:
             lines.append(' '.join(str(totals[flag]) for flag in selected) + ' total')
         return '\n'.join(lines)
-
     def tree(self, arguments):
         flags = set()
         paths = []
@@ -143,7 +125,6 @@ class Shell:
         self.vfs.children(path)
         lines = [path]
         counts = [0, 0]
-
         def visit(directory, prefix, depth):
             if depth_limit is not None and depth > depth_limit:
                 return
@@ -158,7 +139,6 @@ class Shell:
                 counts[0 if item['directory'] else 1] += 1
                 if item['directory']:
                     visit(name, prefix + ('    ' if last else '|   '), depth + 1)
-
         visit(path, '', 1)
         lines.append('{} directories, {} files'.format(*counts))
         return '\n'.join(lines)

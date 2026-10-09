@@ -2,15 +2,10 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
-
 from shell import CommandError, Shell
 from vfs import VirtualFileSystem
-
-
 class CommandTests(unittest.TestCase):
-
     def setUp(self):
         self.folder = tempfile.TemporaryDirectory()
         self.addCleanup(self.folder.cleanup)
@@ -20,7 +15,6 @@ class CommandTests(unittest.TestCase):
         (self.root / 'text').write_text('one two\nlast', encoding='utf-8')
         (self.root / '.hidden').write_text('x')
         self.shell = Shell(VirtualFileSystem(self.root))
-
     def test_navigation_and_listing(self):
         self.assertEqual(self.shell.execute('ls'), 'a\ntext')
         self.assertIn('.hidden', self.shell.execute('ls -a'))
@@ -35,7 +29,6 @@ class CommandTests(unittest.TestCase):
             with self.assertRaises(CommandError):
                 self.shell.execute(line)
         self.assertEqual(self.shell.current, '/')
-
     def test_wc_unicode_and_totals(self):
         self.assertEqual(self.shell.execute('wc text'), '1 3 12 text')
         self.assertEqual(self.shell.execute('wc -lwmc a/b/c/data'), '1 2 4 6 a/b/c/data')
@@ -43,7 +36,6 @@ class CommandTests(unittest.TestCase):
         for line in ('wc', 'wc /', 'wc missing', 'wc -z text'):
             with self.assertRaises(CommandError):
                 self.shell.execute(line)
-
     def test_tree_depth_and_directories(self):
         self.assertIn('data', self.shell.execute('tree'))
         self.assertNotIn('data', self.shell.execute('tree -L 2'))
