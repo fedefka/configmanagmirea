@@ -1,13 +1,8 @@
 from pathlib import Path
 import posixpath
-
-
 class VFSError(Exception):
     pass
-
-
 class VirtualFileSystem:
-
     def __init__(self, source):
         source = Path(source)
         if not source.exists():
@@ -25,7 +20,6 @@ class VirtualFileSystem:
                 self.add_entry(name, path)
         except OSError as error:
             raise VFSError('Ошибка чтения VFS: ' + str(error)) from error
-
     def add_entry(self, name, path):
         self.entries[name] = {
             'directory': path.is_dir(),
@@ -33,24 +27,20 @@ class VirtualFileSystem:
             'owner': str(getattr(path.stat(), 'st_uid', 0)),
             'group': str(getattr(path.stat(), 'st_gid', 0)),
         }
-
     def resolve(self, path, current='/'):
         if not path.startswith('/'):
             path = posixpath.join(current, path)
         return '/' + posixpath.normpath('/' + path.lstrip('/')).lstrip('/')
-
     def get(self, path):
         if path not in self.entries:
             raise VFSError('Путь не найден: ' + path)
         return self.entries[path]
-
     def children(self, path):
         entry = self.get(path)
         if not entry['directory']:
             raise VFSError('Не является директорией: ' + path)
         return sorted(name for name in self.entries
                       if name != '/' and posixpath.dirname(name) == path)
-
     def chown(self, path, owner, group=None, recursive=False):
         self.get(path)
         names = [path]
@@ -62,7 +52,6 @@ class VirtualFileSystem:
                 self.entries[name]['owner'] = owner
             if group is not None:
                 self.entries[name]['group'] = group
-
     def rmdir(self, path, current):
         if path == '/':
             raise VFSError('Нельзя удалить корень VFS')

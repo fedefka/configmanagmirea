@@ -1,11 +1,8 @@
 import sys
-
 from config import CommandLog, read_config
 from gui import ShellWindow
 from shell import Shell
 from vfs import VFSError, VirtualFileSystem
-
-
 def main():
     config = read_config()
     try:
@@ -23,7 +20,5 @@ def main():
         print('Ошибка: ' + str(error), file=sys.stderr)
         return 1
     return 0
-
-
 if __name__ == '__main__':
     sys.exit(main())

@@ -3,12 +3,8 @@ from PySide6.QtWidgets import (
     QApplication, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit,
     QPushButton, QVBoxLayout, QWidget,
 )
-
 from shell import CommandError, VFS_NAME
-
-
 class ShellWindow:
-
     def __init__(self, shell, vfs_name=VFS_NAME, logger=None):
         self.shell = shell
         self.vfs_name = vfs_name
@@ -34,11 +30,9 @@ class ShellWindow:
         row.addWidget(button)
         layout.addLayout(row)
         self.entry.setFocus()
-
     def write(self, text):
         if text:
             self.output.appendPlainText(text)
-
     def execute_line(self, line):
         self.write(self.vfs_name + " $ " + line)
         error_message = ""
@@ -54,19 +48,16 @@ class ShellWindow:
                 self.write("Ошибка записи лога: " + str(error))
         if self.shell.closed:
             self.root.close()
-
     def submit(self):
         line = self.entry.text()
         self.entry.clear()
         self.execute_line(line)
-
     def run_script(self, path):
         from pathlib import Path
         for line in Path(path).read_text(encoding="utf-8").splitlines():
             self.execute_line(line)
             if self.shell.closed:
                 break
-
     def run(self):
         self.root.show()
         self.app.exec()
