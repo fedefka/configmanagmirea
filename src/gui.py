@@ -3,17 +3,13 @@ from PySide6.QtWidgets import (
     QApplication, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit,
     QPushButton, QVBoxLayout, QWidget,
 )
-
 from shell import CommandError, VFS_NAME
-
-
 class ShellWindow:
-
     def __init__(self, shell):
         self.shell = shell
         self.app = QApplication.instance() or QApplication([])
         self.root = QWidget()
-        self.root.setWindowTitle("Эмулятор — " + VFS_NAME)
+        self.root.setWindowTitle("Эмулятор - " + VFS_NAME)
         self.root.resize(760, 480)
         self.root.setMinimumSize(500, 300)
         layout = QVBoxLayout(self.root)
@@ -32,11 +28,9 @@ class ShellWindow:
         row.addWidget(button)
         layout.addLayout(row)
         self.entry.setFocus()
-
     def write(self, text):
         if text:
             self.output.appendPlainText(text)
-
     def submit(self):
         line = self.entry.text()
         self.entry.clear()
@@ -47,7 +41,6 @@ class ShellWindow:
             self.write("Ошибка: " + str(error))
         if self.shell.closed:
             self.root.close()
-
     def run(self):
         self.root.show()
         self.app.exec()
