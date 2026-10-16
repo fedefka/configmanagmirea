@@ -46,7 +46,8 @@ class VirtualFileSystem:
         names = [path]
         if recursive:
             prefix = path.rstrip('/') + '/'
-            names += [name for name in self.entries if name != path and name.startswith(prefix)]
+            names += [name for name in self.entries if name !=
+                      path and name.startswith(prefix)]
         for name in names:
             if owner:
                 self.entries[name]['owner'] = owner

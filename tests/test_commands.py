@@ -11,7 +11,8 @@ class CommandTests(unittest.TestCase):
         self.addCleanup(self.folder.cleanup)
         self.root = Path(self.folder.name)
         (self.root / 'a' / 'b' / 'c').mkdir(parents=True)
-        (self.root / 'a' / 'b' / 'c' / 'data').write_text('А Б\n', encoding='utf-8')
+        data = self.root / 'a' / 'b' / 'c' / 'data'
+        data.write_text('А Б\n', encoding='utf-8')
         (self.root / 'text').write_text('one two\nlast', encoding='utf-8')
         (self.root / '.hidden').write_text('x')
         self.shell = Shell(VirtualFileSystem(self.root))
@@ -31,8 +32,11 @@ class CommandTests(unittest.TestCase):
         self.assertEqual(self.shell.current, '/')
     def test_wc_unicode_and_totals(self):
         self.assertEqual(self.shell.execute('wc text'), '1 3 12 text')
-        self.assertEqual(self.shell.execute('wc -lwmc a/b/c/data'), '1 2 4 6 a/b/c/data')
-        self.assertTrue(self.shell.execute('wc -c text a/b/c/data').endswith('18 total'))
+        self.assertEqual(
+            self.shell.execute('wc -lwmc a/b/c/data'),
+            '1 2 4 6 a/b/c/data')
+        self.assertTrue(self.shell.execute(
+            'wc -c text a/b/c/data').endswith('18 total'))
         for line in ('wc', 'wc /', 'wc missing', 'wc -z text'):
             with self.assertRaises(CommandError):
                 self.shell.execute(line)
@@ -44,3 +48,19 @@ class CommandTests(unittest.TestCase):
         for line in ('tree text', 'tree -L 0', 'tree -L', 'tree x y'):
             with self.assertRaises(CommandError):
                 self.shell.execute(line)
+    def test_tree_flags_and_errors(self):
+        self.assertEqual(
+            self.shell.execute('tree -ad -L 1'),
+            '/\n`-- a\n1 directories, 0 files',
+        )
+        self.assertIn('data', self.shell.execute('tree -- a'))
+        for command in ('tree -L nope', 'tree -L -1', 'tree -x'):
+            with self.assertRaises(CommandError):
+                self.shell.execute(command)
+    def test_wc_flags(self):
+        expected = {'l': '1', 'w': '3', 'm': '12', 'c': '12'}
+        for flag, count in expected.items():
+            self.assertEqual(
+                self.shell.execute('wc -' + flag + ' text'),
+                count + ' text',
+            )

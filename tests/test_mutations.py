@@ -24,9 +24,16 @@ class MutationTests(unittest.TestCase):
         self.shell.execute('chown :other docs/file')
         self.assertEqual(self.shell.vfs.get('/docs/file')['owner'], 'user')
         self.assertEqual(self.shell.vfs.get('/docs/file')['group'], 'other')
-        self.assertEqual((self.root / 'docs' / 'file').stat().st_uid, before.st_uid)
-        self.assertEqual((self.root / 'docs' / 'file').stat().st_gid, before.st_gid)
-        self.assertNotEqual(VirtualFileSystem(self.root).get('/docs/file')['owner'], 'user')
+        self.assertEqual(
+            (self.root / 'docs' / 'file').stat().st_uid,
+            before.st_uid)
+        self.assertEqual(
+            (self.root / 'docs' / 'file').stat().st_gid,
+            before.st_gid)
+        self.assertNotEqual(
+            VirtualFileSystem(
+                self.root).get('/docs/file')['owner'],
+            'user')
     def test_remove_empty_and_parents(self):
         self.shell.execute('rmdir empty')
         self.assertNotIn('/empty', self.shell.vfs.entries)
@@ -34,11 +41,22 @@ class MutationTests(unittest.TestCase):
         self.shell.execute('rmdir -p a/b')
         self.assertNotIn('/a', self.shell.vfs.entries)
         self.assertTrue((self.root / 'a' / 'b').is_dir())
-        self.assertEqual((self.root / 'docs' / 'file').read_bytes(), b'original')
+        self.assertEqual(
+            (self.root / 'docs' / 'file').read_bytes(),
+            b'original')
     def test_mutation_errors(self):
-        for line in ('chown', 'chown user', 'chown : docs', 'chown user: docs',
-                     'chown user missing', 'rmdir', 'rmdir docs', 'rmdir docs/file',
-                     'rmdir /', 'rmdir missing', 'rmdir -z empty'):
+        for line in (
+            'chown',
+            'chown user',
+            'chown : docs',
+            'chown user: docs',
+            'chown user missing',
+            'rmdir',
+            'rmdir docs',
+            'rmdir docs/file',
+            'rmdir /',
+            'rmdir missing',
+                'rmdir -z empty'):
             with self.subTest(line=line):
                 with self.assertRaises(CommandError):
                     self.shell.execute(line)
